@@ -96,7 +96,16 @@ async function run() {
       } 
     })
 
- 
+    app.post('/review', async (req, res) => {
+      try {
+        const review = req.body;
+        const result = await reviewCollection.insertOne(review);
+        res.send(result);
+      } catch (err) {
+        console.error('Error:', err); // Add this line to log any errors
+        res.status(500).send({ message: 'Error retrieving data' });
+      }
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
