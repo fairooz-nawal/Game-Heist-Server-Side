@@ -42,6 +42,11 @@ async function run() {
 
     // game collection api
 
+    app.get('/users',async(req,res)=>{
+       const cursor = userCollection.find();
+       const result = await cursor.toArray();
+       res.send(result);
+    })
     app.post('/users',async(req,res)=>{
        const user = req.body;
        const result = await userCollection.insertOne(user);
