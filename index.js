@@ -1,7 +1,7 @@
 require('dotenv').config()
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.port || 5000;
 const app = express();
 
@@ -9,11 +9,8 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-
-
-
-app.get("/", (req,res)=>{
-    res.send("This is Game Heist Server")
+app.get("/", (req, res) => {
+  res.send("This is Game Heist Server")
 })
 
 
@@ -29,29 +26,78 @@ const client = new MongoClient(uri, {
 });
 
 
-    
+
 
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
-    
-    const gameCollection = client.db("GameHeist").collection("games");
-    const defaultgameCollection =client.db("GameHeist").collection("defaultGames");
+
+    const defaultgameCollection = client.db("GameHeist").collection("default");
     const userCollection = client.db("GameHeist").collection("users");
+    const reviewCollection = client.db("GameHeist").collection("reviews");
 
     // game collection api
+    app.get('/default', async (req, res) => {
+      try {
+        const cursor = defaultgameCollection.find().limit(8);
+        const result = await cursor.toArray(); // Add this line to log the result
+        res.send(result);
+      } catch (err) {
+        console.error('Error:', err); // Add this line to log any errors
+        res.status(500).send({ message: 'Error retrieving data' });
+      }
+    })
 
-    app.get('/users',async(req,res)=>{
-       const cursor = userCollection.find();
-       const result = await cursor.toArray();
-       res.send(result);
+    app.get('/default/:id', async(req,res)=>{
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id)};
+        const result = await defaultgameCollection.findOne(query);
+        res.send(result)
     })
-    app.post('/users',async(req,res)=>{
-       const user = req.body;
-       const result = await userCollection.insertOne(user);
-       res.send(result);
+
+    app.get('/users', async (req, res) => {
+      try {
+        const cursor = userCollection.find();
+        const result = await cursor.toArray();// Add this line to log the result
+        res.send(result);
+      } catch (err) {
+        console.error('Error:', err); // Add this line to log any errors
+        res.status(500).send({ message: 'Error retrieving data' });
+      }
     })
+
+    app.post('/users', async (req, res) => {
+      try {
+        const user = req.body;
+        const result = await userCollection.insertOne(user);
+        res.send(result);
+      } catch (err) {
+        console.error('Error:', err); // Add this line to log any errors
+        res.status(500).send({ message: 'Error retrieving data' });
+      }
+    })
+
+    app.patch('/users',async(req,res)=>{
+      try{
+        const email = req.body.email;
+        const filter = {email};
+        const user = req.body;
+        const updateDoc ={
+            $set:{
+              lastSignInTime:user?.lastSignInTime,
+            }
+        }
+        const result = await userCollection.updateOne(filter, updateDoc);
+        res.send(result);
+      }catch(err){
+        console.error('Error:', err); // Add this line to log any errors
+        res.status(500).send({ message: 'Error retrieving data' });
+      } 
+    })
+
+ 
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -63,6 +109,6 @@ async function run() {
 run().catch(console.dir);
 
 
-app.listen(port,()=>{
-    console.log(`Server is listening at port ${port}`);
+app.listen(port, () => {
+  console.log(`Server is listening at port ${port}`);
 })
