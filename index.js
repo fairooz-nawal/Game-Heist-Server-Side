@@ -37,7 +37,16 @@ async function run() {
     await client.connect();
     
     const gameCollection = client.db("GameHeist").collection("games");
-    
+    const defaultgameCollection =client.db("GameHeist").collection("defaultGames");
+    const userCollection = client.db("GameHeist").collection("users");
+
+    // game collection api
+
+    app.post('/users',async(req,res)=>{
+       const user = req.body;
+       const result = await userCollection.insertOne(user);
+       res.send(result);
+    })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -50,5 +59,5 @@ run().catch(console.dir);
 
 
 app.listen(port,()=>{
-    console.log(`Sever is listening at port ${port}`);
+    console.log(`Server is listening at port ${port}`);
 })
