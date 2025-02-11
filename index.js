@@ -34,6 +34,7 @@ async function run() {
     await client.connect();
 
     const defaultgameCollection = client.db("GameHeist").collection("default");
+    const gameListCollection = client.db("GameHeist").collection("gamelist");
     const userCollection = client.db("GameHeist").collection("users");
     const reviewCollection = client.db("GameHeist").collection("reviews");
 
@@ -54,6 +55,28 @@ async function run() {
         const query = { _id: new ObjectId(id)};
         const result = await defaultgameCollection.findOne(query);
         res.send(result)
+    })
+
+    app.get('/gameList', async (req, res) => {
+      try {
+        const cursor = gameListCollection.find()
+        const result = await cursor.toArray(); // Add this line to log the result
+        res.send(result);
+      } catch (err) {
+        console.error('Error:', err); // Add this line to log any errors
+        res.status(500).send({ message: 'Error retrieving data' });
+      }
+    })
+
+    app.post('/gameList', async (req, res) => {
+      try {
+        const user = req.body;
+        const result = await gameListCollection.insertOne(user);
+        res.send(result);
+      } catch (err) {
+        console.error('Error:', err); // Add this line to log any errors
+        res.status(500).send({ message: 'Error retrieving data' });
+      }
     })
 
     app.get('/users', async (req, res) => {
