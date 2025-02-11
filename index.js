@@ -96,6 +96,30 @@ async function run() {
       } 
     })
 
+    app.get('/review', async (req, res) => {
+      try {
+        const cursor = reviewCollection.find();
+        const result = await cursor.toArray();
+        res.send(result);
+      } catch (err) {
+        console.error('Error:', err); // Add this line to log any errors
+        res.status(500).send({ message: 'Error retrieving data' });
+      }
+    })
+
+    app.get('/review/:email', async (req, res) => {
+      try {
+        const email = req.params.email;
+        const query = {email: email};
+        const cursor = reviewCollection.find(query);
+        const result = await cursor.toArray();
+        res.send(result);
+      } catch (err) {
+        console.error('Error:', err); // Add this line to log any errors
+        res.status(500).send({ message: 'Error retrieving data' });
+      }
+    })
+
     app.post('/review', async (req, res) => {
       try {
         const review = req.body;
