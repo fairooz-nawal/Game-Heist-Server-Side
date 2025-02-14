@@ -130,10 +130,25 @@ async function run() {
       }
     })
 
+
     app.get('/review/:email', async (req, res) => {
       try {
         const email = req.params.email;
         const query = {email: email};
+        const cursor = reviewCollection.find(query);
+        const result = await cursor.toArray();
+        res.send(result);
+      } catch (err) {
+        console.error('Error:', err); // Add this line to log any errors
+        res.status(500).send({ message: 'Error retrieving data' });
+      }
+    })
+
+      app.get('/review/:email/:id', async (req, res) => {
+      try {
+        const id = req.params.id;
+        console.log(id);
+        const query = {_id: new ObjectId(id)};
         const cursor = reviewCollection.find(query);
         const result = await cursor.toArray();
         res.send(result);
@@ -152,6 +167,31 @@ async function run() {
         console.error('Error:', err); // Add this line to log any errors
         res.status(500).send({ message: 'Error retrieving data' });
       }
+    })
+
+    app.patch('/review/:email/:id',async(req,res)=>{
+      try{
+        const id = req.params.id;
+        const filter = {_id: new ObjectId(id)};
+        const updatedreview = req.body;
+        const options = { upsert: true };
+        const NewReview = {
+            $set: {
+              name:updatedreview?.name,
+              gameTitle:updatedreview?.gameTitle,
+              email:updatedreview?.email,
+              photo:updatedreview?.photo,
+              rating:updatedreview?.rating,
+              year:updatedreview?.year,
+              gameGenre:updatedreview?.gameGenre,
+            }
+        }
+        const result = await reviewCollection.updateOne(filter, NewReview, options);
+        res.send(result);
+      }catch(err){
+        console.error('Error:', err); // Add this line to log any errors
+        res.status(500).send({ message: 'Error retrieving data' });
+      } 
     })
 
     app.delete('/review/:id', async (req, res) => {
