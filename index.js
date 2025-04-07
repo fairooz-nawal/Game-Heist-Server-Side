@@ -1,4 +1,4 @@
-require('dotenv').config()
+require("dotenv").config()
 const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -6,8 +6,9 @@ const port = process.env.port || 5000;
 const app = express();
 
 // middleware
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
+
 
 app.get("/", (req, res) => {
   res.send("This is Game Heist Server")
@@ -60,6 +61,18 @@ async function run() {
     app.get('/gameList', async (req, res) => {
       try {
         const cursor = gameListCollection.find()
+        const result = await cursor.toArray(); // Add this line to log the result
+        res.send(result);
+      } catch (err) {
+        console.error('Error:', err); // Add this line to log any errors
+        res.status(500).send({ message: 'Error retrieving data' });
+      }
+    })
+    app.get('/gameList/:email', async (req, res) => {
+      try {
+        const email = req.params.email;
+        const query = {email: email};
+        const cursor = gameListCollection.find(query)
         const result = await cursor.toArray(); // Add this line to log the result
         res.send(result);
       } catch (err) {
@@ -209,7 +222,7 @@ async function run() {
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
@@ -219,5 +232,5 @@ run().catch(console.dir);
 
 
 app.listen(port, () => {
-  console.log(`Server is listening at port ${port}`);
+  // console.log(`Server is listening at port ${port}`);
 })
