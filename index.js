@@ -11,7 +11,7 @@ app.use(express.json());
 
 
 app.get("/", (req, res) => {
-  res.send("This is Game Heist Server")
+  res.send("Welcome to Game Heist Server")
 })
 
 
